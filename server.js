@@ -11,6 +11,26 @@ import userRoutes from './routes/user.routes.js'
 
 const app = express()
 
+// ===== CORS FIX (provisório) =====
+const FRONT = process.env.FRONT_ORIGIN || 'https://7desk.vercel.app'
+app.use((req, res, next) => {
+  // Permite somente seu front em prod; em dev você pode trocar para http://localhost:5173
+  res.setHeader('Access-Control-Allow-Origin', FRONT)
+  res.setHeader('Vary', 'Origin') // para proxies/CDN escolherem o cache certo
+  res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PATCH,DELETE,OPTIONS')
+  res.setHeader('Access-Control-Allow-Headers', 'Authorization,Content-Type')
+  // Se você usar cookies/same-site, ative credenciais. Se não usa, pode remover a linha abaixo.
+  // res.setHeader('Access-Control-Allow-Credentials', 'true')
+
+  if (req.method === 'OPTIONS') {
+    // Pré-flight deve responder 200 SEM redirecionar
+    return res.sendStatus(200)
+  }
+  next()
+})
+// ===== /CORS FIX =====
+
+
 // 🔐 CORS — permita só o seu front (e localhost em dev)
 const ALLOWED_ORIGINS = [
   process.env.FRONT_ORIGIN,            // ex: https://meu-front.vercel.app
